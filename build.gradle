@@ -63,12 +63,13 @@ jastadd {
 	// Target module:
 	// Call Gradle with -Pjastadd.module="..." to select module to build.
 	// Remember to run the 'clean' task if a new target module is specified!
-	module = project.properties['jastadd.module'] ?: "java7 backend"
+	module = project.properties['jastadd.module'] ?: "java7 frontend"
 
 	astPackage = "org.extendj.ast"
 	genDir = "src/gen"
 	buildInfoDir = "src/gen-res"
 	parser.name = "JavaParser"
+	parser.genDir = "src/gen/org/extendj/parser"
 }
 
 project.version = getVersion()
