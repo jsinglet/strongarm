@@ -1,0 +1,77 @@
+
+aspect AddPathLabel {
+
+    protected static String CompilationUnit.JPF_PACKAGE = "gov.nasa.jpf.symbc";
+    protected static String CompilationUnit.JPF_IMPORT = "Debug";
+
+
+    /**
+     * We don't want to add path labels more than once
+     */
+    syn boolean IfStmt.isPathLabelAdded() = pathLabelAdded;
+
+    protected boolean IfStmt.pathLabelAdded = false;
+
+    public void IfStmt.setPathLabelAdded(boolean  pathLabelAdded) {
+        this.pathLabelAdded = pathLabelAdded;
+    }
+
+    protected static int Stmt.pathLabelDepth = 0;
+
+
+    syn int Stmt.getPathLabelDepth() = pathLabelDepth;
+
+    public void Stmt.setPathLabelDepth(int pathLabelDepth){
+        this.pathLabelDepth = pathLabelDepth;
+    }
+
+    public boolean CompilationUnit.hasJPFImports(){
+
+        List<ImportDecl> list = getImportDeclList();
+
+        for(ImportDecl d : list){
+            if(d.getAccess().packageName().equalsIgnoreCase(JPF_PACKAGE)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Each top level getThen() getElse()
+     */
+
+    rewrite IfStmt {
+        when (isPathLabelAdded()==false)
+        to IfStmt {
+            setPathLabelDepth(getPathLabelDepth()+1);
+            System.out.println(getPathLabelDepth());
+            setPathLabelAdded(true);
+            setCondition(new BooleanLiteral("true"));
+
+            //getThen().insertChild(new BooleanLiteral("false"), 0);
+
+            //if(hasElse()){
+            //    getElse().insertChild(new BooleanLiteral("false"),0);
+            //}
+
+            return this;
+        }
+    }
+
+    rewrite CompilationUnit {
+        when (hasJPFImports()==false)
+
+        to CompilationUnit {
+
+            SingleTypeImportDecl decl = new SingleTypeImportDecl();
+            decl.setAccess(new TypeAccess(JPF_PACKAGE, JPF_IMPORT));
+            addImportDecl(decl);
+
+            return this;
+        }
+    }
+
+
+}
