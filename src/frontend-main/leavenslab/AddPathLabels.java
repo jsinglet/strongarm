@@ -4,6 +4,7 @@ package leavenslab;
  * Created by jls on 2/26/16.
  */
 
+import beaver.Symbol;
 import org.extendj.ExtendJVersion;
 import org.extendj.ast.*;
 
@@ -53,6 +54,16 @@ class AddPathLabels extends Frontend {
      */
     public AddPathLabels() {
         super("AddPathLabels", ExtendJVersion.getVersion());
+
+//        final Symbol _symbol_m = _symbols[offset + 1];
+//        final List m = (List) _symbol_m.value;
+//        final Symbol _symbol_t = _symbols[offset + 2];
+//        final Access t = (Access) _symbol_t.value;
+//        final Symbol _symbol_l = _symbols[offset + 3];
+//        final List l = (List) _symbol_l.value;'
+        //Symbol s = new Symbol()
+        //VariableDeclarator(IDENTIFIER, d, new Opt());
+//
 
         parser = new JavaParser() {
             @Override
@@ -105,6 +116,10 @@ class AddPathLabels extends Frontend {
                 it.remove();
             }
         }
+
+
+
+
         super.processErrors(errors, unit);
         try {
             unit.prettyPrint(new PrintStream(System.out, false, "UTF-8"));

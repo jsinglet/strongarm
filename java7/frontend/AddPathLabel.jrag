@@ -25,6 +25,58 @@ aspect AddPathLabel {
         this.pathLabelDepth = pathLabelDepth;
     }
 
+    public String Stmt.getFreshLabel(){
+        setPathLabelDepth(getPathLabelDepth()+1);
+        return "_strongarm_taken_" + getPathLabelDepth();
+    }
+
+    public VarDeclStmt Stmt.getTag(String tagLabel){
+        Opt<Expr> rhs = new Opt<Expr>();
+
+        rhs.addChild(new BooleanLiteral("false"));
+
+        VariableDeclarator d = new VariableDeclarator(tagLabel + getPathLabelDepth(), new List(), rhs);
+
+        List l = new List();
+        l.add(d);
+
+        VarDeclStmt tag = new VarDeclStmt(new Modifiers(new List()), new PrimitiveTypeAccess("boolean"), l);
+
+        return tag;
+    }
+
+    public void Stmt.wireBlock(Block b){
+
+        String tagLabel = getFreshLabel();
+        // we add two items
+
+        // first, we add a local boolean variable which we will set
+        // after symbolic execution to tell the post condition inference
+        // tool if this branch was taken in the symbolic execution
+        //
+        // eg: boolean _strongarm_taken_<pathLabelDepth> = false;
+        VarDeclStmt tag = getTag(tagLabel);
+        //b.setStmt(tag,0);
+        b.addStmt(tag);
+        // second, we insert debugging statements of the form:
+        //
+        // Debug.printPC("\nPath Condition: [[<pathLabelDepth>]]");
+
+        List<Stmt> stmts = b.getStmtList();
+
+        // swap
+        int last = stmts.numChildren()-1;
+
+        Stmt s0 = stmts.getChild(0);
+        Stmt sn = stmts.getChild(last);
+
+        stmts.setChild(sn,0);
+        stmts.setChild(s0, last);
+
+    }
+
+
+
     public boolean CompilationUnit.hasJPFImports(){
 
         List<ImportDecl> list = getImportDeclList();
@@ -39,22 +91,21 @@ aspect AddPathLabel {
     }
 
     /**
-     * Each top level getThen() getElse()
+     * Each top level
      */
 
     rewrite IfStmt {
         when (isPathLabelAdded()==false)
         to IfStmt {
-            setPathLabelDepth(getPathLabelDepth()+1);
-            System.out.println(getPathLabelDepth());
+            // prevent from readding the label
             setPathLabelAdded(true);
-            setCondition(new BooleanLiteral("true"));
 
-            //getThen().insertChild(new BooleanLiteral("false"), 0);
+            wireBlock((Block)getThen());
 
-            //if(hasElse()){
-            //    getElse().insertChild(new BooleanLiteral("false"),0);
-            //}
+            if(hasElse()){
+                wireBlock((Block)getElse());
+            }
+
 
             return this;
         }
