@@ -1,0 +1,16 @@
+module("strongarm") {
+	moduleName "Strongarm"
+
+	java {
+    		basedir "src/"
+    		include "**/*.java"
+    }
+
+	jastadd {
+		include "grammar/*.ast"
+		include "frontend/*.jadd"
+		include "frontend/*.jrag"
+	}
+
+	imports "java7 frontend"
+}

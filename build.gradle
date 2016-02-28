@@ -63,7 +63,7 @@ jastadd {
 	// Target module:
 	// Call Gradle with -Pjastadd.module="..." to select module to build.
 	// Remember to run the 'clean' task if a new target module is specified!
-	module = project.properties['jastadd.module'] ?: "java7 frontend"
+	module = project.properties['jastadd.module'] ?: "strongarm"
 
 	astPackage = "org.extendj.ast"
 	genDir = "src/gen"
